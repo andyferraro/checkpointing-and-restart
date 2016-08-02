@@ -71,12 +71,12 @@ try{
   cmd.add( writeSwitch );
 
   SwitchArg readSwitch("r","read","Read the array from disk", false);
-  cmd.add( writeSwitch );
+  cmd.add( readSwitch );
 
   cmd.parse( argc, argv );
   intarraysize = intarraysizeArg.getValue();
   bool write=writeSwitch.getValue();
-  bool read=writeSwitch.getValue();
+  bool read=readSwitch.getValue();
 
   chrono::high_resolution_clock::time_point t1, t2;
   chrono::duration<double> time_span;
