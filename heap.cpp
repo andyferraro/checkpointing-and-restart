@@ -8,7 +8,7 @@
 //using std::string;
 using namespace std;
 long intarraysize=3000000000;
-log chararraysize=12000000000;
+long chararraysize=12000000000;
 chrono::milliseconds duration(5000);
 
 void writetofile(int* array, long size){
