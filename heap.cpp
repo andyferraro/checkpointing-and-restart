@@ -7,7 +7,8 @@
 
 //using std::string;
 using namespace std;
-
+long intarraysize=3000000000;
+log chararraysize=12000000000;
 chrono::milliseconds duration(5000);
 
 void writetofile(int* array, long size){
@@ -17,7 +18,7 @@ fclose(file);
 }
 
 void intheaparray(){
-  long  array_size = 3000000000;
+  long  array_size = intarraysize;
   int *array = new int[array_size]();
   writetofile(array,array_size);
   delete array;
@@ -29,7 +30,7 @@ int* intheaparray(long array_size){
 }
 
 void charheaparray(){
-  long  array_size = 12000000000;
+  long  array_size = chararraysize;
   char *array = new char[array_size]();
   delete array;
 }
@@ -49,8 +50,8 @@ void sleep(chrono::milliseconds dur){
 
 int main() {
   //intheaparray();
-  int* array=intheaparray(3000000000);
-  writetofile(array,3000000000);
+  int* array=intheaparray(intarraysize);
+  writetofile(array,intarraysize);
   delete array;
   //sleep(duration);
   //charheaparray();
