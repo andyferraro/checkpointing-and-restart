@@ -29,6 +29,10 @@ int* intheaparray(long array_size){
   return array;
 }
 
+void intheaparray(int* arrayp, long array_size){
+  arrayp = new int[array_size]();
+}
+
 void charheaparray(){
   long  array_size = chararraysize;
   char *array = new char[array_size]();
@@ -50,8 +54,24 @@ void sleep(chrono::milliseconds dur){
 
 int main() {
   //intheaparray();
+  chrono::high_resolution_clock::time_point t1, t2;
+  chrono::duration<double> time_span;
+
+  cout << "Start step1" << endl;
+  t1 = chrono::high_resolution_clock::now();
   int* array=intheaparray(intarraysize);
+  t2 = chrono::high_resolution_clock::now();
+  time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+  cout << "Stop step1. " ;
+  cout << "It took me " << time_span.count() << " seconds." << endl;
+
+  cout << "Start step2" << endl;
+  t1 = chrono::high_resolution_clock::now();
   writetofile(array,intarraysize);
+  t2 = chrono::high_resolution_clock::now();
+  time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+  cout << "Stop step2. " ;
+  cout << "It took me " << time_span.count() << " seconds." << endl;
   delete array;
   //sleep(duration);
   //charheaparray();
