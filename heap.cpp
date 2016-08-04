@@ -5,6 +5,7 @@
 #include <thread>
 #include <string.h>
 #include "tclap/CmdLine.h"
+//#include <fstream>
 
 //using std::string;
 using namespace std;
@@ -13,10 +14,14 @@ long defaultintarraysize=3000000000, intarraysize;
 long chararraysize=12000000000;
 chrono::milliseconds duration(5000);
 
-void writetofile(int* array, long size){
-FILE* file = fopen( "myfile.bin", "wb" );
-fwrite(array, sizeof(int), size, file);
-fclose(file);
+void writetofile(int* array, long size, bool sync){
+ FILE* file = fopen( "myfile.bin", "wb" );
+ fwrite(array, sizeof(int), size, file);
+ if(sync) {
+  fflush(file);
+  //fsync(fileno(file));
+ }
+ fclose(file);
 }
 
 void readfromfile(int* array, long size){
@@ -25,12 +30,14 @@ fread(array, sizeof(int), size, file);
 fclose(file);
 }
 
+/*
 void intheaparray(){
   long  array_size = intarraysize;
   int *array = new int[array_size]();
   writetofile(array,array_size);
   delete array;
 }
+*/
 
 int* intheaparray(long array_size){
   int *array = new int[array_size]();
@@ -64,7 +71,7 @@ int main(int argc, char** argv) {
 try{
   //intheaparray();
   CmdLine cmd("By A.Ferraro", ' ', "0.1");
-  ValueArg<long> intarraysizeArg("s","size","Size of the array",false,defaultintarraysize,"long");
+  ValueArg<long> intarraysizeArg("s","s","Size of the array",false,defaultintarraysize,"long");
   cmd.add(intarraysizeArg);
 
   SwitchArg writeSwitch("w","write","Write the array to disk", false);
@@ -73,10 +80,14 @@ try{
   SwitchArg readSwitch("r","read","Read the array from disk", false);
   cmd.add( readSwitch );
 
+  SwitchArg syncSwitch("f","fsync","Write and sync the array to disk", false);
+  cmd.add( syncSwitch );
+
   cmd.parse( argc, argv );
   intarraysize = intarraysizeArg.getValue();
   bool write=writeSwitch.getValue();
   bool read=readSwitch.getValue();
+  bool sync=syncSwitch.getValue();
 
   chrono::high_resolution_clock::time_point t1, t2;
   chrono::duration<double> time_span;
@@ -92,7 +103,7 @@ try{
   if (write){
   cout << "Start step2" << endl;
   t1 = chrono::high_resolution_clock::now();
-  writetofile(array,intarraysize);
+  writetofile(array,intarraysize,sync);
   t2 = chrono::high_resolution_clock::now();
   time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
   cout << "Stop step2. " ;
