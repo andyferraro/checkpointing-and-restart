@@ -13,19 +13,44 @@ using namespace TCLAP;
 long defaultintarraysize=3000000000, intarraysize;
 long chararraysize=12000000000;
 chrono::milliseconds duration(5000);
+string defaultfilename="myfile.bin",filename;
 
-void writetofile(int* array, long size, bool sync){
- FILE* file = fopen( "myfile.bin", "wb" );
+void writetofile(string myfilename, int* array, long size, bool sync){
+ chrono::high_resolution_clock::time_point t01, t02, t03, t04;
+ //chrono::duration<double> dt01, dt02, dt03, dt04; 
+ chrono::duration<double> dt1,dt2,dt3;
+
+ char *fn = const_cast<char*>(myfilename.c_str());
+ FILE* file = fopen( fn, "wb" );
+ t01 = chrono::high_resolution_clock::now();
  fwrite(array, sizeof(int), size, file);
+ t02 = chrono::high_resolution_clock::now();
  if(sync) {
+  cout << "flushing" << endl;
   fflush(file);
   //fsync(fileno(file));
+  cout << "flushed" << endl;
  }
+ t03 = chrono::high_resolution_clock::now();
  fclose(file);
+ t04 = chrono::high_resolution_clock::now();
+ //auto nt01=chrono::duration_cast<chrono::nanoseconds>(t01.time_since_epoch()).count();
+ //auto nt02=chrono::duration_cast<chrono::nanoseconds>(t02.time_since_epoch()).count();
+ //auto nt03=chrono::duration_cast<chrono::nanoseconds>(t03.time_since_epoch()).count();
+ //auto nt04=chrono::duration_cast<chrono::nanoseconds>(t04.time_since_epoch()).count();
+ dt1 = chrono::duration_cast<chrono::duration<double>>(t02 - t01);
+ dt2 = chrono::duration_cast<chrono::duration<double>>(t03 - t01);
+ dt3 = chrono::duration_cast<chrono::duration<double>>(t04 - t01);
+ //dt01= duration_cast<nanoseconds>(now.time_since_epoch()).count();
+ //auto dt001= chrono::duration_cast<nanoseconds>(t01.time_since_epoch()).count();
+ cout << "dt01: " << dt1.count() << endl;
+ cout << "dt02: " << dt2.count() << endl;
+ cout << "dt03: " << dt3.count() << endl;
 }
 
 void readfromfile(int* array, long size){
-FILE* file = fopen( "myfile.bin", "rb" );
+char *fn = const_cast<char*>(filename.c_str());
+FILE* file = fopen( fn, "rb" );
 fread(array, sizeof(int), size, file);
 fclose(file);
 }
@@ -74,6 +99,9 @@ try{
   ValueArg<long> intarraysizeArg("s","s","Size of the array",false,defaultintarraysize,"long");
   cmd.add(intarraysizeArg);
 
+  ValueArg<string> filenameArg("n","name","Name of the file",false,defaultfilename,"string");
+  cmd.add(filenameArg);
+
   SwitchArg writeSwitch("w","write","Write the array to disk", false);
   cmd.add( writeSwitch );
 
@@ -85,13 +113,15 @@ try{
 
   cmd.parse( argc, argv );
   intarraysize = intarraysizeArg.getValue();
+  filename=filenameArg.getValue();
   bool write=writeSwitch.getValue();
   bool read=readSwitch.getValue();
   bool sync=syncSwitch.getValue();
 
   chrono::high_resolution_clock::time_point t1, t2;
   chrono::duration<double> time_span;
-
+  
+  cout << endl;;
   cout << "Start step1" << endl;
   t1 = chrono::high_resolution_clock::now();
   int* array=intheaparray(intarraysize);
@@ -100,10 +130,12 @@ try{
   cout << "Stop step1. " ;
   cout << "It took me " << time_span.count() << " seconds." << endl;
 
+  cout << "filename: " << filename;
   if (write){
+  cout << endl;;
   cout << "Start step2" << endl;
   t1 = chrono::high_resolution_clock::now();
-  writetofile(array,intarraysize,sync);
+  writetofile(filename, array, intarraysize, sync);
   t2 = chrono::high_resolution_clock::now();
   time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
   cout << "Stop step2. " ;
