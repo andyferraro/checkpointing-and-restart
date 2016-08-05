@@ -24,6 +24,17 @@ long chararraysize=12000000000;
 chrono::milliseconds duration(5000);
 string defaultfilename="myfile.bin",filename;
 
+int GetFileDescriptor(std::filebuf& filebuf)
+{
+  class my_filebuf : public std::filebuf
+  {
+  public:
+    int handle() { return _M_file.fd(); }
+  };
+
+  return static_cast<my_filebuf&>(filebuf).handle();
+}
+
 void writetofile(string myfilename, int* array, long size, bool sync){
  chrono::high_resolution_clock::time_point t01, t02, t03, t04;
  chrono::duration<double> dt1,dt2,dt3;
@@ -37,7 +48,7 @@ void writetofile(string myfilename, int* array, long size, bool sync){
  if(sync) {
   cout << "flushing" << endl;
   fflush(file);
-  //fsync(fileno(file));
+  fsync(fileno(file));
   cout << "flushed" << endl;
  }
  t03 = chrono::high_resolution_clock::now();
@@ -104,6 +115,7 @@ void writetofile3(string myfilename, int const * array, long size, bool sync){
   cout << "flushing" << endl;
   outfile.flush();
   //fsync(fileno(file));
+  fsync(GetFileDescriptor(*outfile.rdbuf()));
   cout << "flushed" << endl;
  }
  t03 = chrono::high_resolution_clock::now();
