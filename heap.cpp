@@ -63,16 +63,19 @@ void writetofile2(string myfilename, int* array, long size, bool sync){
  //char buffer[BUF_SIZE];   
  string myfilename2=myfilename+"2";
  char *fn = const_cast<char*>(myfilename2.c_str());
- output_fd = open(fn, O_WRONLY | O_CREAT, 0644);
+ output_fd = open(fn, O_WRONLY|O_CREAT|O_TRUNC, 0664);
  //ret_out = write (output_fd, array, (ssize_t) );
  t01 = chrono::high_resolution_clock::now();
- ret_out = write (output_fd, array, size );
+ ret_out = write (output_fd, array, sizeof(int)*size );
  t02 = chrono::high_resolution_clock::now();
  if(sync) {
   cout << "syncing" << endl;
-  fsync(output_fd);
+  int ret=fsync(output_fd);
   //fsync(fileno(file));
-  cout << "synced" << endl;
+  if(ret==00)
+   cout << "synced" << endl;
+  else
+   cerr << "not synced" << endl;
  }
  t03 = chrono::high_resolution_clock::now();
  close(output_fd);
