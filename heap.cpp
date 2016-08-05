@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <fstream>
+
 //#include <fstream>
 
 //using std::string;
@@ -55,6 +57,7 @@ void writetofile(string myfilename, int* array, long size, bool sync){
  cout << "dt03: " << dt3.count() << endl;
 }
 
+
 void writetofile2(string myfilename, int* array, long size, bool sync){
  chrono::high_resolution_clock::time_point t01, t02, t03, t04;
  chrono::duration<double> dt1,dt2,dt3;
@@ -88,6 +91,32 @@ void writetofile2(string myfilename, int* array, long size, bool sync){
  cout << "dt03: " << dt3.count() << endl;
 }
 
+void writetofile3(string myfilename, int const * array, long size, bool sync){
+ chrono::high_resolution_clock::time_point t01, t02, t03, t04;
+ chrono::duration<double> dt1,dt2,dt3;
+ int input_fd, output_fd;   
+ string fn=myfilename+"3";
+ ofstream outfile(fn,ofstream::binary);
+  t01 = chrono::high_resolution_clock::now();
+ outfile.write(reinterpret_cast<const char *>(array),sizeof(int)*size);
+  t02 = chrono::high_resolution_clock::now();
+ if(sync) {
+  cout << "flushing" << endl;
+  outfile.flush();
+  //fsync(fileno(file));
+  cout << "flushed" << endl;
+ }
+ t03 = chrono::high_resolution_clock::now();
+ outfile.close();
+ t04 = chrono::high_resolution_clock::now();
+ dt1 = chrono::duration_cast<chrono::duration<double>>(t02 - t01);
+ dt2 = chrono::duration_cast<chrono::duration<double>>(t03 - t01);
+ dt3 = chrono::duration_cast<chrono::duration<double>>(t04 - t01);
+ cout << "dt01: " << dt1.count() << endl;
+ cout << "dt02: " << dt2.count() << endl;
+ cout << "dt03: " << dt3.count() << endl;
+
+}
 
 void readfromfile(int* array, long size){
 char *fn = const_cast<char*>(filename.c_str());
@@ -185,6 +214,15 @@ try{
   cout << "Start writing to disk (open,write,close system calls)" << endl;
   t1 = chrono::high_resolution_clock::now();
   writetofile2(filename, array, intarraysize, sync);
+  t2 = chrono::high_resolution_clock::now();
+  time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+  cout << "Stop writing. " ;
+  cout << "It took me " << time_span.count() << " seconds." << endl;
+
+  cout << endl;;
+  cout << "Start writing to disk (ofstream c++)" << endl;
+  t1 = chrono::high_resolution_clock::now();
+  writetofile3(filename, array, intarraysize, sync);
   t2 = chrono::high_resolution_clock::now();
   time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
   cout << "Stop writing. " ;
