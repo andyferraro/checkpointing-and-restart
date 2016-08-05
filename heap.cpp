@@ -5,6 +5,13 @@
 #include <thread>
 #include <string.h>
 #include "tclap/CmdLine.h"
+
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 //#include <fstream>
 
 //using std::string;
@@ -17,8 +24,8 @@ string defaultfilename="myfile.bin",filename;
 
 void writetofile(string myfilename, int* array, long size, bool sync){
  chrono::high_resolution_clock::time_point t01, t02, t03, t04;
- //chrono::duration<double> dt01, dt02, dt03, dt04; 
  chrono::duration<double> dt1,dt2,dt3;
+ //chrono::duration<double> dt01, dt02, dt03, dt04; 
 
  char *fn = const_cast<char*>(myfilename.c_str());
  FILE* file = fopen( fn, "wb" );
@@ -47,6 +54,37 @@ void writetofile(string myfilename, int* array, long size, bool sync){
  cout << "dt02: " << dt2.count() << endl;
  cout << "dt03: " << dt3.count() << endl;
 }
+
+void writetofile2(string myfilename, int* array, long size, bool sync){
+ chrono::high_resolution_clock::time_point t01, t02, t03, t04;
+ chrono::duration<double> dt1,dt2,dt3;
+ int input_fd, output_fd;   
+ ssize_t ret_in, ret_out;  
+ //char buffer[BUF_SIZE];   
+ string myfilename2=myfilename+"2";
+ char *fn = const_cast<char*>(myfilename2.c_str());
+ output_fd = open(fn, O_WRONLY | O_CREAT, 0644);
+ //ret_out = write (output_fd, array, (ssize_t) );
+ t01 = chrono::high_resolution_clock::now();
+ ret_out = write (output_fd, array, size );
+ t02 = chrono::high_resolution_clock::now();
+ if(sync) {
+  cout << "syncing" << endl;
+  fsync(output_fd);
+  //fsync(fileno(file));
+  cout << "synced" << endl;
+ }
+ t03 = chrono::high_resolution_clock::now();
+ close(output_fd);
+ t04 = chrono::high_resolution_clock::now();
+ dt1 = chrono::duration_cast<chrono::duration<double>>(t02 - t01);
+ dt2 = chrono::duration_cast<chrono::duration<double>>(t03 - t01);
+ dt3 = chrono::duration_cast<chrono::duration<double>>(t04 - t01);
+ cout << "dt01: " << dt1.count() << endl;
+ cout << "dt02: " << dt2.count() << endl;
+ cout << "dt03: " << dt3.count() << endl;
+}
+
 
 void readfromfile(int* array, long size){
 char *fn = const_cast<char*>(filename.c_str());
@@ -122,23 +160,31 @@ try{
   chrono::duration<double> time_span;
   
   cout << endl;;
-  cout << "Start step1" << endl;
+  cout << "Start creating array" << endl;
   t1 = chrono::high_resolution_clock::now();
   int* array=intheaparray(intarraysize);
   t2 = chrono::high_resolution_clock::now();
   time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-  cout << "Stop step1. " ;
+  cout << "Stop creating array. " ;
   cout << "It took me " << time_span.count() << " seconds." << endl;
 
-  cout << "filename: " << filename;
   if (write){
   cout << endl;;
-  cout << "Start step2" << endl;
+  cout << "Start writing to disk (fopen,fwrite,fclose glibc)" << endl;
   t1 = chrono::high_resolution_clock::now();
   writetofile(filename, array, intarraysize, sync);
   t2 = chrono::high_resolution_clock::now();
   time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-  cout << "Stop step2. " ;
+  cout << "Stop writing. " ;
+  cout << "It took me " << time_span.count() << " seconds." << endl;
+
+  cout << endl;;
+  cout << "Start writing to disk (open,write,close system calls)" << endl;
+  t1 = chrono::high_resolution_clock::now();
+  writetofile2(filename, array, intarraysize, sync);
+  t2 = chrono::high_resolution_clock::now();
+  time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+  cout << "Stop writing. " ;
   cout << "It took me " << time_span.count() << " seconds." << endl;
   //delete array;
   }
