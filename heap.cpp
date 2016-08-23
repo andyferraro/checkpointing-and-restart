@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
 try{
   //intheaparray();
   CmdLine cmd("By A.Ferraro", ' ', "0.1");
-  ValueArg<long> intarraysizeArg("s","s","Size of the array",false,defaultintarraysize,"long");
+  ValueArg<long> intarraysizeArg("s","s","Size of the array",true,defaultintarraysize,"long");
   cmd.add(intarraysizeArg);
 
   ValueArg<string> filenameArg("n","name","Name of the file",false,defaultfilename,"string");
