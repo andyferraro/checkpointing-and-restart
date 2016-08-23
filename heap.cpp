@@ -24,6 +24,28 @@ long chararraysize=12000000000;
 chrono::milliseconds duration(5000);
 string defaultfilename="myfile.bin",filename;
 
+int* intheaparray(long array_size){
+  int *array = new int[array_size]();
+  return array;
+}
+
+void intheaparray(int* arrayp, long array_size){
+  arrayp = new int[array_size]();
+}
+
+void charheaparray(){
+  long  array_size = chararraysize;
+  char *array = new char[array_size]();
+  delete array;
+}
+
+
+void charstackarray(){
+  long  array_size = 1200000;
+  char array[array_size];
+  memset(array,0,sizeof(array));
+}
+
 int GetFileDescriptor(std::filebuf& filebuf)
 {
   class my_filebuf : public std::filebuf
@@ -146,27 +168,6 @@ void intheaparray(){
 }
 */
 
-int* intheaparray(long array_size){
-  int *array = new int[array_size]();
-  return array;
-}
-
-void intheaparray(int* arrayp, long array_size){
-  arrayp = new int[array_size]();
-}
-
-void charheaparray(){
-  long  array_size = chararraysize;
-  char *array = new char[array_size]();
-  delete array;
-}
-
-
-void charstackarray(){
-  long  array_size = 1200000;
-  char array[array_size];
-  memset(array,0,sizeof(array));
-}
 
 void sleep(chrono::milliseconds dur){
   cout << "Before sleep_for" << endl;
